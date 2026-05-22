@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Piedra Papel o Tijeras</title>
+
+<style>
+
+body{
+    margin:0;
+    padding:0;
+    background-color:#2b2b2b;
+    font-family:Arial, sans-serif;
+    color:white;
+}
+
+/* 🔥 NUEVO LAYOUT (NO rompe proporciones) */
+.layout{
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    gap:40px;
+    padding-top:40px;
+}
+
+/* JUEGO */
+.contenedor{
+
+    width:700px;
+
+    background-color:#3c3f41;
+
+    padding:30px;
+
+    border-radius:15px;
+
+    text-align:center;
+
+    box-shadow:0px 0px 20px rgba(0,0,0,0.5);
+}
+
+h1{
+    margin-bottom:20px;
+}
+
+input{
+    width:250px;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    margin-bottom:20px;
+}
+
+.oponente{
+    width:150px;
+    height:150px;
+    margin:auto;
+    margin-bottom:25px;
+    background-color:white;
+    border-radius:10px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.oponente img{
+    width:120px;
+    height:120px;
+    object-fit:contain;
+}
+
+.mensaje{
+    font-size:22px;
+    color:#4da3ff;
+    margin-bottom:20px;
+    min-height:30px;
+}
+
+.botones-control{
+    margin-bottom:40px;
+}
+
+.botones-control button{
+    padding:12px 20px;
+    margin:10px;
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+    cursor:pointer;
+}
+
+.juego{
+    display:flex;
+    justify-content:center;
+    gap:30px;
+}
+
+.juego button{
+    width:130px;
+    height:130px;
+    border:none;
+    border-radius:12px;
+    background-color:white;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.juego button:hover{
+    transform:scale(1.08);
+}
+
+.juego button:disabled{
+    opacity:0.5;
+    cursor:not-allowed;
+}
+
+.juego img{
+    width:100px;
+    height:100px;
+    object-fit:contain;
+}
+
+.victorias{
+    margin-top:20px;
+    font-size:20px;
+}
+
+/* TABLA */
+.tabla{
+    width:250px;
+    background-color:#3c3f41;
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0px 0px 20px rgba(0,0,0,0.5);
+    height:fit-content;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th, td{
+    padding:8px;
+    border-bottom:1px solid #555;
+    text-align:left;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="layout">
+
+    <!-- JUEGO -->
+    <div class="contenedor">
+
+        <h1>Piedra Papel o Tijeras</h1>
+
+        <input type="text" id="nombre" placeholder="Ingrese su nombre">
+
+        <div class="oponente">
+            <img id="imagenOponente" src="/img/question.png">
+        </div>
+
+        <div class="mensaje" id="mensaje">
+            Seleccione "Nueva Partida"
+        </div>
+
+        <div class="botones-control">
+            <button onclick="nuevaPartida()">Nueva Partida</button>
+            <button onclick="salir()">Salir</button>
+        </div>
+
+        <div class="juego">
+
+            <button id="btnPiedra" onclick="jugar(1)">
+                <img src="/img/piedra.png">
+            </button>
+
+            <button id="btnPapel" onclick="jugar(2)">
+                <img src="/img/papel.png">
+            </button>
+
+            <button id="btnTijera" onclick="jugar(3)">
+                <img src="/img/tijera.png">
+            </button>
+
+        </div>
+
+        <div class="victorias" id="victorias">
+            Victorias seguidas: 0
+        </div>
+
+    </div>
+
+    <!-- TABLA -->
+    <div class="tabla">
+        <h3>Top Jugadores</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Victorias</th>
+                </tr>
+            </thead>
+            <tbody id="tablaBody"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+
+let victorias = 0;
+let partidaActiva = false;
+
+function activarBotones(estado){
+    document.getElementById("btnPiedra").disabled = !estado;
+    document.getElementById("btnPapel").disabled = !estado;
+    document.getElementById("btnTijera").disabled = !estado;
+}
+
+function nuevaPartida(){
+    partidaActiva = true;
+    activarBotones(true);
+
+    document.getElementById("mensaje").innerText =
+        "Seleccione una opción";
+
+    document.getElementById("imagenOponente").src =
+        "/img/question.png";
+}
+
+function salir(){
+    partidaActiva = false;
+    victorias = 0;
+
+    document.getElementById("mensaje").innerText = "Juego cerrado";
+    document.getElementById("victorias").innerText = "Victorias seguidas: 0";
+
+    document.getElementById("imagenOponente").src = "/img/question.png";
+
+    activarBotones(false);
+}
+
+async function cargarRanking(){
+
+    const response = await fetch("http://localhost:8080/juego/ranking");
+    const data = await response.json();
+
+    let html = "";
+
+    data.forEach(j => {
+        html += `
+            <tr>
+                <td>${j.nombre}</td>
+                <td>${j.victorias}</td>
+            </tr>
+        `;
+    });
+
+    document.getElementById("tablaBody").innerHTML = html;
+}
+
+async function jugar(opcion){
+
+    if(!partidaActiva){
+        alert("Primero presione Nueva Partida");
+        return;
+    }
+
+    const nombre = document.getElementById("nombre").value;
+
+    if(nombre.trim() === ""){
+        alert("Ingrese un nombre");
+        return;
+    }
+
+    try{
+
+        const response = await fetch(
+            `http://localhost:8080/juego/jugar?nombre=${nombre}&jugador=${opcion}&victoriasActuales=${victorias}`,
+            { method:"POST" }
+        );
+
+        const texto = await response.text();
+        const partes = texto.split("|");
+
+        const mensaje = partes[0];
+        const oponente = parseInt(partes[1]);
+
+        document.getElementById("mensaje").innerText = mensaje;
+
+        if(oponente === 1) document.getElementById("imagenOponente").src = "/img/piedra.png";
+        if(oponente === 2) document.getElementById("imagenOponente").src = "/img/papel.png";
+        if(oponente === 3) document.getElementById("imagenOponente").src = "/img/tijera.png";
+
+        if(mensaje.includes("Ganaste")) victorias++;
+        if(mensaje.includes("Perdiste")) victorias = 0;
+
+        document.getElementById("victorias").innerText =
+            "Victorias seguidas: " + victorias;
+
+        partidaActiva = false;
+        activarBotones(false);
+
+        cargarRanking();
+
+    }catch(error){
+        console.error(error);
+        alert("Error conectando con Spring");
+    }
+}
+
+activarBotones(false);
+cargarRanking();
+
+</script>
+
+</body>
+</html>
