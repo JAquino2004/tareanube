@@ -6,7 +6,6 @@
 <title>Piedra Papel o Tijeras</title>
 
 <style>
-
 body{
     margin:0;
     padding:0;
@@ -15,7 +14,6 @@ body{
     color:white;
 }
 
-/* 🔥 NUEVO LAYOUT (NO rompe proporciones) */
 .layout{
     display:flex;
     justify-content:center;
@@ -24,25 +22,16 @@ body{
     padding-top:40px;
 }
 
-/* JUEGO */
 .contenedor{
-
     width:700px;
-
     background-color:#3c3f41;
-
     padding:30px;
-
     border-radius:15px;
-
     text-align:center;
-
     box-shadow:0px 0px 20px rgba(0,0,0,0.5);
 }
 
-h1{
-    margin-bottom:20px;
-}
+h1{ margin-bottom:20px; }
 
 input{
     width:250px;
@@ -75,10 +64,6 @@ input{
     color:#4da3ff;
     margin-bottom:20px;
     min-height:30px;
-}
-
-.botones-control{
-    margin-bottom:40px;
 }
 
 .botones-control button{
@@ -126,7 +111,6 @@ input{
     font-size:20px;
 }
 
-/* TABLA */
 .tabla{
     width:250px;
     background-color:#3c3f41;
@@ -146,7 +130,6 @@ th, td{
     border-bottom:1px solid #555;
     text-align:left;
 }
-
 </style>
 
 </head>
@@ -176,7 +159,6 @@ th, td{
         </div>
 
         <div class="juego">
-
             <button id="btnPiedra" onclick="jugar(1)">
                 <img src="/img/piedra.png">
             </button>
@@ -188,7 +170,6 @@ th, td{
             <button id="btnTijera" onclick="jugar(3)">
                 <img src="/img/tijera.png">
             </button>
-
         </div>
 
         <div class="victorias" id="victorias">
@@ -200,7 +181,6 @@ th, td{
     <!-- TABLA -->
     <div class="tabla">
         <h3>Top Jugadores</h3>
-
         <table>
             <thead>
                 <tr>
@@ -216,6 +196,8 @@ th, td{
 
 <script>
 
+const API = "https://tareanube-1.onrender.com";
+
 let victorias = 0;
 let partidaActiva = false;
 
@@ -229,11 +211,8 @@ function nuevaPartida(){
     partidaActiva = true;
     activarBotones(true);
 
-    document.getElementById("mensaje").innerText =
-        "Seleccione una opción";
-
-    document.getElementById("imagenOponente").src =
-        "/img/question.png";
+    document.getElementById("mensaje").innerText = "Seleccione una opción";
+    document.getElementById("imagenOponente").src = "/img/question.png";
 }
 
 function salir(){
@@ -242,7 +221,6 @@ function salir(){
 
     document.getElementById("mensaje").innerText = "Juego cerrado";
     document.getElementById("victorias").innerText = "Victorias seguidas: 0";
-
     document.getElementById("imagenOponente").src = "/img/question.png";
 
     activarBotones(false);
@@ -250,7 +228,7 @@ function salir(){
 
 async function cargarRanking(){
 
-    const response = await fetch("http://localhost:8080/juego/ranking");
+    const response = await fetch(`${API}/juego/ranking`);
     const data = await response.json();
 
     let html = "";
@@ -284,7 +262,7 @@ async function jugar(opcion){
     try{
 
         const response = await fetch(
-            `http://localhost:8080/juego/jugar?nombre=${nombre}&jugador=${opcion}&victoriasActuales=${victorias}`,
+            `${API}/juego/jugar?nombre=${nombre}&jugador=${opcion}&victoriasActuales=${victorias}`,
             { method:"POST" }
         );
 
